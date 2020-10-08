@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+np.set_printoptions(linewidth=np.inf, precision=3)
 
 save_txt_file = False
 plot_results = False
@@ -13,6 +13,8 @@ def save_to_file(plik='wyniki.xyz'):  # Funkcja od zapisu kryształu do pliku
 
 
 def plot_momentum():  # Funkcja do histogramów pędu
+    import matplotlib.pyplot as plt
+
     fig, axs = plt.subplots(1, 3)
     for (indx, title), ax in zip(enumerate('x y z'.split()), axs):
         ax.hist(p[:, indx], bins=30)
@@ -22,7 +24,7 @@ def plot_momentum():  # Funkcja do histogramów pędu
 
 
 def load_initial_cond(plik='dane.txt'):  # Wczytanie warunków początkowych z pliku
-    global n, m, a, T0, N, k
+    global n, m, a, T0, N, k, epsilon, L, f, R
     '''
     n - liczba atomów w jednej osi,
     m - masa atomu,
@@ -42,7 +44,7 @@ def load_initial_cond(plik='dane.txt'):  # Wczytanie warunków początkowych z p
 
     data[0] = int(data[0])
     k = 8.31e-3
-    n, m, a, T0 = data
+    n, m, a, T0, epsilon, L, f, R = data
     N = n**3
 
 
@@ -79,3 +81,27 @@ p = p - sum(p)/N  # wyeliminowanie ruchu środka masy
 
 if plot_results:
     plot_momentum()
+
+# Obliczenie potencjału i sił
+Vs = np.zeros(N)
+Vp = np.zeros((N, N))
+Fs = np.zeros((N, 3))
+Fp = np.zeros((N, N, 3))
+for indx1, pos in enumerate(r):
+    r_abs = np.linalg.norm(pos)
+    if r_abs > L:
+        Vs[indx1] = 1/2 * f * (r_abs-L)**2
+        for indx2, r_curr in enumerate(pos):
+            Fs[indx1, indx2] = f*(L-r_abs)*r_curr/r_abs
+
+for indx1, particle1 in enumerate(r[1:]):
+    indx1 += 1
+    for indx2, particle2 in enumerate(r[:indx1]):
+        r_abs = np.linalg.norm(particle1 - particle2)
+        Vp[indx1, indx2] = epsilon * ((R / r_abs)**12 - 2*(R/r_abs)**6)
+        Vp[indx2, indx1] = Vp[indx1, indx2]
+        Fp[indx1, indx2] = 12*epsilon * ((R/r_abs)**12 - (R/r_abs)**6) * ((particle1-particle2)/r_abs**2)
+        Fp[indx2, indx1] -= Fp[indx1, indx2]
+
+V = np.sum(Vs) + np.sum(Vp)/2
+F = Fs + np.sum(Fp, axis=1)
