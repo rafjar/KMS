@@ -130,7 +130,7 @@ def count_forces():
             Vp[indx1, indx2] = epsilon * ((R / r_abs)**12 - 2*(R/r_abs)**6)
             Vp[indx2, indx1] = Vp[indx1, indx2]
             Fp[indx1, indx2] = 12*epsilon * ((R/r_abs)**12 - (R/r_abs)**6) * ((particle1-particle2)/r_abs**2)
-            Fp[indx2, indx1] -= Fp[indx1, indx2]
+            Fp[indx2, indx1] = -Fp[indx1, indx2]
 
     V = np.sum(Vs) + np.sum(Vp)/2
     F = Fs + np.sum(Fp, axis=1)
@@ -196,7 +196,7 @@ def symulacja():
         count_hamiltonian()
 
         if not i % S_out:
-            save_properties(i)
+            save_properties()
 
         if not i % S_xyz:
             save_positions()
