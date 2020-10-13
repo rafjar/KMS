@@ -9,14 +9,16 @@ position_file = open('avs.txt', 'w')
 properties_file = open('properties.txt', 'w')
 
 
-def save_to_file(plik='wyniki.xyz'):  # Funkcja od zapisu kryształu do pliku
+# Funkcja od zapisu kryształu do pliku
+def save_to_file(plik='wyniki.xyz'):
     with open(plik, 'w') as f:
         f.write(f'{N}\n\n')
         for indx, (x, y, z) in enumerate(r):
             f.write(f'atom{indx}\t{x}\t{y}\t{z}\n')
 
 
-def plot_momentum():  # Funkcja do histogramów pędu
+# Funkcja do histogramów pędu
+def plot_momentum():
     import matplotlib.pyplot as plt
 
     fig, axs = plt.subplots(1, 3)
@@ -27,7 +29,8 @@ def plot_momentum():  # Funkcja do histogramów pędu
     plt.show()
 
 
-def load_initial_cond(plik='dane.txt'):  # Wczytanie warunków początkowych z pliku
+# Wczytanie warunków początkowych z pliku
+def load_initial_cond(plik='dane.txt'):
     global n, m, a, T0, N, k, epsilon, L, f, R, tau, S_o, S_d, S_out, S_xyz
     '''
     n - liczba atomów w jednej osi,
@@ -107,11 +110,10 @@ H = None
 T_avg = 0
 P_avg = 0
 H_avg = 0
+t = 0
 
 
-# Oblaczanie sił i potencjałów
-
-
+# Obliczenie sił i potencjałów
 def count_forces():
     global Vs, Vp, Fs, Fp, V, F
     for indx1, pos in enumerate(r):
@@ -140,13 +142,13 @@ def count_pressure():
     P = 1/(4*np.pi*L**2) * np.sum(np.linalg.norm(Fs, axis=1))
 
 
+# Obliczenie energii
 def count_energy():
     global E_kin
     E_kin = np.linalg.norm(p, axis=1)**2 / (2*m)
 
+
 # Obliczanie temperatury
-
-
 def count_temperature():
     global T, p, N, k, m
     count_energy()
@@ -161,19 +163,22 @@ def count_hamiltonian():
 
 # Całkowanie równania ruchu
 def integrate():
-    global p, F, r, tau
+    global p, F, r, tau, t
     p = p + F*tau/2
     r = r + p*tau/m
     count_forces()
     count_pressure()
     p = p + F*tau/2
+    t += tau
 
 
-def save_properties(t):
-    global H, V, T, P
+# Zapisanie parametrów układu
+def save_properties():
+    global H, V, T, P, t
     properties_file.write(f'{t}\t{H}\t{V}\t{T}\t{P}\n')
 
 
+# Zapisanie położeń atomów
 def save_positions():
     global r, E_kin, N
     position_file.write(f'{N}\n\n')
@@ -181,6 +186,7 @@ def save_positions():
         position_file.write(f'Ar\t{x}\t{y}\t{z}\t{E}\n')
 
 
+# Symulacja całego układu
 def symulacja():
     global S_o, S_d, S_out, S_xyz, T_avg, H_avg, P_avg
 
