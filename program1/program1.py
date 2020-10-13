@@ -184,7 +184,6 @@ def save_positions():
 
 
 def symulacja():
-    global E_kin
     global S_o, S_d, S_out, S_xyz, T_avg, H_avg, P_avg
 
     for i in tqdm(range(S_o + S_d)):
