@@ -99,7 +99,7 @@ if plot_results:
 
 # Obliczenie potencjału i sił
 Vs = np.zeros(N)
-Vp = np.zeros((N, N))
+Vp = np.zeros(N)
 Fs = np.zeros((N, 3))
 Fp = np.zeros((N, N, 3))
 V = None
@@ -127,12 +127,11 @@ def count_forces():
         indx1 += 1
         for indx2, particle2 in enumerate(r[:indx1]):
             r_abs = np.linalg.norm(particle1 - particle2)
-            Vp[indx1, indx2] = epsilon * ((R / r_abs)**12 - 2*(R/r_abs)**6)
-            Vp[indx2, indx1] = Vp[indx1, indx2]
+            Vp[indx1] = epsilon * ((R / r_abs)**12 - 2*(R/r_abs)**6)
             Fp[indx1, indx2] = 12*epsilon * ((R/r_abs)**12 - (R/r_abs)**6) * ((particle1-particle2)/r_abs**2)
             Fp[indx2, indx1] = -Fp[indx1, indx2]
 
-    V = np.sum(Vs) + np.sum(Vp)/2
+    V = np.sum(Vs) + np.sum(Vp)
     F = Fs + np.sum(Fp, axis=1)
 
 
