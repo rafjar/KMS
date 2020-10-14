@@ -215,3 +215,9 @@ symulacja()
 
 position_file.close()
 properties_file.close()
+
+# Zapisanie wartości średnich
+with open('mean_properties.txt', 'w') as f:
+    f.write(f'T_avg:\t{T_avg}\n')
+    f.write(f'P_avg:\t{P_avg}\n')
+    f.write(f'H_avg:\t{H_avg}\n')

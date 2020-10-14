@@ -1,6 +1,6 @@
 import numpy as np
-import multiprocessing
-import time
+from numba import jit
+from tqdm import tqdm
 np.set_printoptions(linewidth=np.inf, precision=3)
 
 save_txt_file = False
@@ -103,14 +103,6 @@ Vs = np.zeros(N)
 Vp = np.zeros((N, N))
 Fs = np.zeros((N, 3))
 Fp = np.zeros((N, N, 3))
-shm1 = multiprocessing.RawArray('d', N)
-shm2 = multiprocessing.RawArray('d', N*N)
-shm3 = multiprocessing.RawArray('d', N*3)
-shm4 = multiprocessing.RawArray('d', N*N*3)
-Vs = np.frombuffer(shm1, dtype=np.float).reshape(Vs.shape)
-Vp = np.frombuffer(shm2, dtype=np.float).reshape(Vp.shape)
-Fs = np.frombuffer(shm3, dtype=np.float).reshape(Fs.shape)
-Fp = np.frombuffer(shm4, dtype=np.float).reshape(Fp.shape)
 V = None
 F = None
 P = None
@@ -120,13 +112,14 @@ T_avg = 0
 P_avg = 0
 H_avg = 0
 t = 0
-i = [int(i*N/multiprocessing.cpu_count()) for i in range(multiprocessing.cpu_count())]
-j = [int((i+1)*N/multiprocessing.cpu_count()) for i in range(multiprocessing.cpu_count())]
 
 
-def task(i_min, i_max, N, r, f, L, R, Vs, Vp, Fs, Fp):  # funkcja wątku
-    for indx1 in range(i_min, min(i_max, N)):
-        particle1 = r[indx1]
+# Obliczenie sił i potencjałów
+@jit
+def count_forces(Vs, Vp, Fs, Fp):
+    Fp[:] = 0
+    for indx1, particle1 in enumerate(r):
+
         r_abs = np.linalg.norm(particle1)
         if r_abs >= L:
             Vs[indx1] = 1/2 * f * (r_abs-L)**2
@@ -138,20 +131,7 @@ def task(i_min, i_max, N, r, f, L, R, Vs, Vp, Fs, Fp):  # funkcja wątku
             Fp[indx1, indx2] = 12*epsilon * ((R/r_abs)**12 - (R/r_abs)**6) * ((particle1-particle2)/r_abs**2)
             Fp[indx2, indx1] = -Fp[indx1, indx2]
 
-
-# Obliczenie sił i potencjałów
-def count_forces():
-    global Vs, Vp, Fs, Fp, V, F
-    Fp[:] = 0
-
-    processes = [multiprocessing.Process(target=task, args=(i[ii], j[ii], N, r, f, L, R, Vs, Vp, Fs, Fp)) for ii in range(multiprocessing.cpu_count())]
-    for process in processes:
-        process.start()
-    for process in processes:
-        process.join()
-
-    V = np.sum(Vs) + np.sum(Vp)
-    F = Fs + np.sum(Fp, axis=1)
+    return np.sum(Vs) + np.sum(Vp), Fs + np.sum(Fp, axis=1)
 
 
 # Obliczanie ciśnienia
@@ -184,7 +164,7 @@ def integrate():
     global p, F, r, tau, t
     p = p + F*tau/2
     r = r + p*tau/m
-    count_forces()
+    V, F = count_forces(Vs, Vp, Fs, Fp)
     count_pressure()
     p = p + F*tau/2
     t += tau
@@ -208,7 +188,7 @@ def save_positions():
 def symulacja():
     global S_o, S_d, S_out, S_xyz, T_avg, H_avg, P_avg
 
-    for i in range(S_o + S_d):
+    for i in tqdm(range(S_o + S_d)):
         integrate()
         count_temperature()
         count_hamiltonian()
@@ -230,12 +210,8 @@ def symulacja():
 
 
 # Wstępne obliczenie sił i uruchomienie symulacji
-count_forces()
-start = time.time()
+V, F = count_forces(Vs, Vp, Fs, Fp)
 symulacja()
-end = time.time()
-
-print(f'Elapse time: {end-start}s.')
 
 position_file.close()
 properties_file.close()
