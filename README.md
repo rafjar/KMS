@@ -7,3 +7,7 @@
 1. program1.py - główny skrypt
 2. wykres.py - służy do przedstawienia wielkości H, V, T, P w funkcji czasu na wykresie
 3. dane.txt - warunki początkowe
+
+<br />
+
+*Pozdrawiam i życzę miłego kodowania*
