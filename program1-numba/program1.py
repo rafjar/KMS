@@ -155,13 +155,13 @@ def count_temperature():
 
 # Obliczanie Hamiltonianu
 def count_hamiltonian():
-    global p, V, H
+    global p, V, H, V
     H = np.sum(np.linalg.norm(p, axis=1)**2 / (2*m)) + V
 
 
 # Całkowanie równania ruchu
 def integrate():
-    global p, F, r, tau, t
+    global p, F, r, tau, t, F, V
     p = p + F*tau/2
     r = r + p*tau/m
     V, F = count_forces(Vs, Vp, Fs, Fp, r)
