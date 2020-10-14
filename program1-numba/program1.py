@@ -116,7 +116,7 @@ t = 0
 
 # Obliczenie sił i potencjałów
 @jit
-def count_forces(Vs, Vp, Fs, Fp):
+def count_forces(Vs, Vp, Fs, Fp, r):
     Fp[:] = 0
     for indx1, particle1 in enumerate(r):
 
@@ -164,7 +164,7 @@ def integrate():
     global p, F, r, tau, t
     p = p + F*tau/2
     r = r + p*tau/m
-    V, F = count_forces(Vs, Vp, Fs, Fp)
+    V, F = count_forces(Vs, Vp, Fs, Fp, r)
     count_pressure()
     p = p + F*tau/2
     t += tau
@@ -210,7 +210,7 @@ def symulacja():
 
 
 # Wstępne obliczenie sił i uruchomienie symulacji
-V, F = count_forces(Vs, Vp, Fs, Fp)
+V, F = count_forces(Vs, Vp, Fs, Fp, r)
 symulacja()
 
 position_file.close()
