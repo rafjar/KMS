@@ -75,7 +75,7 @@ def count_FV(N, r, L, f, epsilon, R):
 
 # Obliczenie ciśnienia
 def count_pressure(Fs, L):
-    P = np.linalg.norm(Fs, axis=-1) / (4 * np.pi * L**2)
+    P = np.sum(np.linalg.norm(Fs, axis=-1)) / (4 * np.pi * L**2)
     return P
 
 
