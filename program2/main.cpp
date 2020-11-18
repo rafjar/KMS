@@ -87,6 +87,11 @@ int main() {
 
         // Zapis parametrów układu do pliku
         if(!(i%zapis_parametrow)) {
+            // Obliczenie H_R w czasie tau + d_tau/2
+            for(int k2=1; k2<N-1; ++k2) 
+                H_R[k2] = -1./2 * ((psi_R[k2-1] - 2*psi_R[k2] + psi_R[k2+1]) / (delta_x*delta_x))
+                        + kappa * (k2*delta_x - 1./2) * psi_R[k2] * std::sin(omega*tau);
+
             double N_zapis = 0, x_zapis = 0, E_zapis = 0;
             for(int j=0; j<N; j++) {
                 N_zapis += psi_R[j]*psi_R[j] + psi_I[j]*psi_I[j];
