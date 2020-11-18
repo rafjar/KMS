@@ -9,7 +9,6 @@ int main() {
     std::ofstream gestosc_prawd("gestosc_prawd.dat"); // Otworzenie pliku do zapisu gęstości prawdopodobieństwa
     std::ofstream parametry("parametry.txt"); // Zapisanie parametrów układu
 
-    double L = 1; // Długość odcinka
     int N; // Liczba punktów na siatce
     dane >> N; dane.ignore(100, '\n'); // Wczytanie N z pliku
     double delta_x = 1./N;
@@ -19,36 +18,28 @@ int main() {
     int kroki;
     dane >> kroki; dane.ignore(100, '\n'); // Wczytanie liczby kroków z pliku
 
-    // Stałe fizyczne
-    const double e = -1.6e-19; // Ładunek elektronu
-    const double m = 9.1e-31; // Masa elektronu
-    const double h_bar = 6.58e-16; // h kreślone w eV*s
-
     // Inne śmieszne parametry
     int n;
-    double K0;
-    double Omega;
+    double kappa;
+    double omega;
     dane >> n; dane.ignore(100, '\n'); // Wczytanie n z pliku
-    dane >> K0; dane.ignore(100, '\n'); // Wczytanie K0 z pliku
-    dane >> Omega; dane.ignore(100, '\n'); // Wczytanie Omega z pliku
-
-    double kappa = K0*e*m*L*L*L / (h_bar*h_bar);
-    double omega = Omega*m*L*L / h_bar;
+    dane >> kappa; dane.ignore(100, '\n'); // Wczytanie K0 z pliku
+    dane >> omega; dane.ignore(100, '\n'); // Wczytanie Omega z pliku
 
     // Wczytanie co ile zapisywać dane
     int zapis_parametrow, zapis_gestosci_prawd;
     dane >> zapis_parametrow; dane.ignore(100, '\n');
     dane >> zapis_gestosci_prawd;
 
-    std::vector<double> psi_R(N), psi_I(N); // Tablice funkcji falowych
-    std::vector<double> H_R(N), H_I(N); // Talice hamiltonianów
+    std::vector<double> psi_R(N+1), psi_I(N+1); // Tablice funkcji falowych
+    std::vector<double> H_R(N+1), H_I(N+1); // Talice hamiltonianów
 
     // Inicjalizacja funkcji falowych
-    for(int k=0; k<N; ++k)
+    for(int k=0; k<=N; ++k)
         psi_R[k] = std::sqrt(2) * std::sin(n * M_PI * k*delta_x);
 
     // Inicjalizacja Hamiltonianów
-    for(int k=1; k<N-1; ++k) {
+    for(int k=1; k<=N-1; ++k) {
         H_R[k] = -1./2 * ((psi_R[k-1] - 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
                 + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega*tau);
 
@@ -58,24 +49,31 @@ int main() {
 
     // Pętla symulacji
     for(int i=0; i<kroki; ++i) {
-        for(int k1=0; k1<N; ++k1) {
-            psi_R[k1] = psi_R[k1] + H_I[k1] * delta_tau/2; // Obliczenie psi_R w czasie tau + d_tau/2
+        for(int k=0; k<=N; ++k) {
+            // Obliczenie psi_R w czasie tau + d_tau/2
+            psi_R[k] += H_I[k] * delta_tau/2;
 
-            tau += delta_tau/2;
+            tau += delta_tau;
             // Obliczenie H_R w czasie tau + d_tau/2
-            for(int k2=1; k2<N-1; ++k2)
-                H_R[k2] = -1./2 * ((psi_R[k2-1] - 2*psi_R[k2] + psi_R[k2+1]) / (delta_x*delta_x))
-                        + kappa * (k2*delta_x - 1./2) * psi_R[k2] * std::sin(omega*tau);
+            if(k == 0 || k == N)
+                H_R[k] = 0;
+            else
+                H_R[k] = -1./2 * ((psi_R[k-1] + 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
+                        + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega * tau);
 
-            psi_I[k1] = psi_I[k1] - H_R[k1] * delta_tau; // Obliczenie psi_I w czasie tau + d_tau
+            // Obliczenie psi_I w czasie tau + d_tau
+            psi_I[k] -= H_R[k] * delta_tau;
 
-            tau += delta_tau/2;
-            // Obliczenie H_I w czasie tau + d_tau
-            for(int k2=1; k2<N-1; ++k2)
-                H_I[k2] = -1./2 * ((psi_I[k2-1] - 2*psi_I[k2] + psi_I[k2+1]) / (delta_x*delta_x))
-                        + kappa * (k2*delta_x - 1./2) * psi_I[k2] * std::sin(omega*tau);
+            // Obliczenie H_I w czasie tau + d_tau/2
+            if(k == 0 || k == N)
+                H_I[k] = 0;
+            else
+                H_I[k] = -1./2 * ((psi_I[k-1] + 2*psi_I[k] + psi_I[k+1]) / (delta_x*delta_x))
+                        + kappa * (k*delta_x - 1./2) * psi_I[k] * std::sin(omega * tau);
 
-            psi_R[k1] = psi_R[k1] + H_I[k1] * delta_tau/2; // Obliczenie psi_R w czasue tau + d_tau
+            tau += delta_tau;
+            // Obliczenie psi_R w czasie tau + d_tau
+            psi_R[k] += H_I[k] * delta_tau/2;
         }
 
         // Zapis gęstości prawdopodobieństwa położenia
@@ -88,15 +86,15 @@ int main() {
         // Zapis parametrów układu do pliku
         if(!(i%zapis_parametrow)) {
             // Obliczenie H_R w czasie tau
-            for(int k2=1; k2<N-1; ++k2) 
-                H_R[k2] = -1./2 * ((psi_R[k2-1] - 2*psi_R[k2] + psi_R[k2+1]) / (delta_x*delta_x))
-                        + kappa * (k2*delta_x - 1./2) * psi_R[k2] * std::sin(omega*tau);
+            for(int k=1; k<=N-1; ++k) 
+                H_R[k] = -1./2 * ((psi_R[k-1] + 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
+                        + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega * tau);
 
             double N_zapis = 0, x_zapis = 0, E_zapis = 0;
-            for(int j=0; j<N; j++) {
-                N_zapis += psi_R[j]*psi_R[j] + psi_I[j]*psi_I[j];
-                x_zapis += j*delta_x*(psi_R[j]*psi_R[j] + psi_I[j]*psi_I[j]);
-                E_zapis += psi_R[j]*H_R[j] + psi_I[j]*H_I[j];
+            for(int k=0; k<=N; ++k) {
+                N_zapis += psi_R[k]*psi_R[k] + psi_I[k]*psi_I[k];
+                x_zapis += k*delta_x*(psi_R[k]*psi_R[k] + psi_I[k]*psi_I[k]);
+                E_zapis += psi_R[k]*H_R[k] + psi_I[k]*H_I[k];
             }
             N_zapis *= delta_x;
             x_zapis *= delta_x;

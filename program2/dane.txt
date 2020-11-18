@@ -1,8 +1,8 @@
-101   #N
-1e-4  #delta_tau 
-40000 #kroki
-1     #n
-0     #K0
-0     #Omega
-20    #Zapis_parametrow
-100   #Zapis_gestosci_prawd
+100    #N
+1e-4   #delta_tau 
+500000 #kroki
+1      #n
+0      #kappa
+0      #omega
+20     #Zapis_parametrow
+100    #Zapis_gestosci_prawd

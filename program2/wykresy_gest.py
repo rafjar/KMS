@@ -9,6 +9,6 @@ with open('gestosc_prawd.dat') as f:
 dane = np.array(dane)
 L = np.linspace(0, 1, dane.shape[1])
 
-plt.plot(L, dane[-30:].T)
+plt.plot(L, dane[5])
 plt.grid()
 plt.show()
