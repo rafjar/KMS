@@ -41,10 +41,10 @@ int main() {
     // Inicjalizacja Hamiltonianów
     for(int k=1; k<=N-1; ++k) {
         H_R[k] = -1./2 * ((psi_R[k-1] - 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
-                + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega*tau);
+                + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega * tau);
 
         H_I[k] = -1./2 * ((psi_I[k-1] - 2*psi_I[k] + psi_I[k+1]) / (delta_x*delta_x))
-                + kappa * (k*delta_x - 1./2) * psi_I[k] * std::sin(omega*tau);
+                + kappa * (k*delta_x - 1./2) * psi_I[k] * std::sin(omega * tau);
     }
 
     // Pętla symulacji
@@ -53,12 +53,12 @@ int main() {
             // Obliczenie psi_R w czasie tau + d_tau/2
             psi_R[k] += H_I[k] * delta_tau/2;
 
-            tau += delta_tau;
+            tau += delta_tau/2;
             // Obliczenie H_R w czasie tau + d_tau/2
             if(k == 0 || k == N)
                 H_R[k] = 0;
             else
-                H_R[k] = -1./2 * ((psi_R[k-1] + 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
+                H_R[k] = -1./2 * ((psi_R[k-1] - 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
                         + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega * tau);
 
             // Obliczenie psi_I w czasie tau + d_tau
@@ -68,10 +68,10 @@ int main() {
             if(k == 0 || k == N)
                 H_I[k] = 0;
             else
-                H_I[k] = -1./2 * ((psi_I[k-1] + 2*psi_I[k] + psi_I[k+1]) / (delta_x*delta_x))
+                H_I[k] = -1./2 * ((psi_I[k-1] - 2*psi_I[k] + psi_I[k+1]) / (delta_x*delta_x))
                         + kappa * (k*delta_x - 1./2) * psi_I[k] * std::sin(omega * tau);
 
-            tau += delta_tau;
+            tau += delta_tau/2;
             // Obliczenie psi_R w czasie tau + d_tau
             psi_R[k] += H_I[k] * delta_tau/2;
         }
@@ -87,7 +87,7 @@ int main() {
         if(!(i%zapis_parametrow)) {
             // Obliczenie H_R w czasie tau
             for(int k=1; k<=N-1; ++k) 
-                H_R[k] = -1./2 * ((psi_R[k-1] + 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
+                H_R[k] = -1./2 * ((psi_R[k-1] - 2*psi_R[k] + psi_R[k+1]) / (delta_x*delta_x))
                         + kappa * (k*delta_x - 1./2) * psi_R[k] * std::sin(omega * tau);
 
             double N_zapis = 0, x_zapis = 0, E_zapis = 0;
