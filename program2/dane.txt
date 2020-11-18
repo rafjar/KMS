@@ -1,0 +1,8 @@
+101   #N
+1e-6  #delta_tau 
+40000 #kroki
+1     #n
+0     #K0
+0     #Omega
+20    #Zapis_parametrow
+100   #Zapis_gestosci_prawd
