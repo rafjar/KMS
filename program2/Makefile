@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -pedantic -O2 -std=c++17
+CXXFLAGS = -Wall -pedantic -O3 -std=c++17
 LFLAGS =
 
 OBJS = main.o

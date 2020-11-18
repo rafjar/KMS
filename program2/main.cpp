@@ -54,24 +54,27 @@ int main() {
 
     // Pętla symulacji
     for(int i=0; i<kroki; ++i) {
-        for(int k=0; k<=N; ++k) {
-            // Obliczenie psi_R w czasie tau + d_tau/2
+        // Obliczenie psi_R w czasie tau + d_tau/2
+        for(int k=0; k<=N; ++k)
             psi_R[k] += H_I[k] * delta_tau/2;
 
-            tau += delta_tau/2; // Czas tau + d_tau/2
-            // Obliczenie H_R w czasie tau + d_tau/2
+        tau += delta_tau/2; // Czas tau + d_tau/2
+        // Obliczenie H_R w czasie tau + d_tau/2
+        for(int k=1; k<=N-1; ++k)
             H_R[k] = count_H(psi_R, k, delta_x, kappa, omega, tau);
 
-            // Obliczenie psi_I w czasie tau + d_tau
+        // Obliczenie psi_I w czasie tau + d_tau
+        for(int k=0; k<=N; ++k)
             psi_I[k] -= H_R[k] * delta_tau;
 
-            tau += delta_tau/2; // Czas tau + d_tau
-            // Obliczenie H_I w czasie tau + d_tau
+        tau += delta_tau/2; // Czas tau + d_tau
+        // Obliczenie H_I w czasie tau + d_tau
+        for(int k=1; k<=N-1; ++k)
             H_I[k] = count_H(psi_I, k, delta_x, kappa, omega, tau);
 
-            // Obliczenie psi_R w czasie tau + d_tau
+        // Obliczenie psi_R w czasie tau + d_tau
+        for(int k=0; k<=N; ++k)
             psi_R[k] += H_I[k] * delta_tau/2;
-        }
 
         // Zapis gęstości prawdopodobieństwa położenia
         if(!(i%zapis_gestosci_prawd)) {

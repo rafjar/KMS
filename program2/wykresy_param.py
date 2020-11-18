@@ -13,4 +13,5 @@ dane = dane[:, 1:]
 plt.plot(t, dane)
 plt.grid()
 plt.legend(('N', 'x', 'E'))
+plt.xlabel(r'$\tau$')
 plt.show()

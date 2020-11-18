@@ -11,4 +11,6 @@ L = np.linspace(0, 1, dane.shape[1])
 
 plt.plot(L, dane[5])
 plt.grid()
+plt.ylabel(r'$\rho$')
+plt.xlabel('L')
 plt.show()

@@ -2,7 +2,7 @@
 1e-4   #delta_tau 
 500000 #kroki
 1      #n
-0      #kappa
-0      #omega
+3      #kappa
+1      #omega
 20     #Zapis_parametrow
 100    #Zapis_gestosci_prawd
