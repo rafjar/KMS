@@ -1,5 +1,5 @@
 101   #N
-1e-6  #delta_tau 
+1e-4  #delta_tau 
 40000 #kroki
 1     #n
 0     #K0
